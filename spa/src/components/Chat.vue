@@ -666,6 +666,7 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
           (
             this.$store.data.place.slug === 'fleamarket' ||
             this.$store.data.place.slug === 'blackmarket' ||
+            this.canInteractWithObject ||
             this.$store.data.place.member_id === this.$store.data.user.id
           )){
             this.menuDrop = true;
@@ -698,7 +699,13 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
           'id': this.$store.data.user.id
         });
       }
-      if(admin && admin.data.status === 'success'){
+      if(this.$store.data.place.type === 'public') {
+        admin = await this.$http.get(`/place/can_admin/${this.$store.data.place.slug}/${this.$store.data.user.id}`);
+      }
+      
+      if(admin && admin.data.status === 'success' ||
+        admin && admin.data.result === true
+      ){
         this.canModify = true;
         if(this.$store.data.view3d){
           this.canInteractWithObject = true;
@@ -1030,7 +1037,6 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
             this.messages.push({msg: response, username: data.msg.username, from: this.virtualPet.pet_name, whisper: true, new: true,})
             if(this.tts){
               this.textToSpeech({msg: response});
-              console.log(response);
             }
           }, 1500);
         } 
