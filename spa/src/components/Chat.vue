@@ -684,18 +684,19 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
     },
     async canAdmin(){
       let admin = null;
+      let staff = null;
       if(this.$store.data.place.slug === 'mall' || this.$store.data.place.type === 'shop'){
-        admin = await this.$http.get("/mall/can_admin", {
+        staff = await this.$http.get("/mall/can_admin", {
           'id': this.$store.data.user.id
         });
       }
       if(this.$store.data.place.slug === 'fleamarket'){
-        admin = await this.$http.get("/fleamarket/can_admin", {
+        staff = await this.$http.get("/fleamarket/can_admin", {
           'id': this.$store.data.user.id
         });
       }
       if(this.$store.data.place.slug === 'blackmarket'){
-        admin = await this.$http.get("/blackmarket/can_admin", {
+        staff = await this.$http.get("/blackmarket/can_admin", {
           'id': this.$store.data.user.id
         });
       }
@@ -703,7 +704,7 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
         admin = await this.$http.get(`/place/can_admin/${this.$store.data.place.slug}/${this.$store.data.user.id}`);
       }
       
-      if(admin && admin.data.status === 'success' ||
+      if(staff && staff.data.status === 'success' ||
         admin && admin.data.result === true
       ){
         this.canModify = true;
