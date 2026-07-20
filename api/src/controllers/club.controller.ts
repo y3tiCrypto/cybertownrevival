@@ -101,7 +101,7 @@ class ClubController {
       return;
     }
     const clubId = Number.parseInt(request.body.clubId);
-    const canAdmin = await this.placeService.canAdmin('clubs', clubId, session.id);
+    const canAdmin = await this.placeService.canAdmin('personalclub', clubId, session.id);
     console.log(`canAdmin: ${canAdmin}`);
     
     if (canAdmin) {
@@ -114,6 +114,9 @@ class ClubController {
         response.status(400).json({message: error.message});
         return;
       }
+    } else {
+      response.status(403).json({message: 'Forbidden'});
+      return;
     }
   }
   
