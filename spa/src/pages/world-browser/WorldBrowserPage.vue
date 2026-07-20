@@ -9,7 +9,7 @@
         </a>
       </strong>
     </div>
-    <div id="world" class="world w-full flex-1" style="" v-show="this.$store.data.view3d && !force2d"></div>
+    <div id="world" class="world w-full flex-1 min-h-0 min-w-0" style="" v-show="this.$store.data.view3d && !force2d"></div>
     <div v-show="!this.$store.data.view3d || force2d" class="w-full flex-1">
       <component :is="mainComponent"></component>
     </div>
@@ -69,6 +69,7 @@ export default Vue.extend({
       force2d: false,
       pet: null,
       clickId: null,
+      saveTimeouts: new Map(),
     };
   },
   methods: {
@@ -143,7 +144,7 @@ export default Vue.extend({
           y: 0,
           z: 0,
         };
-      } else {
+      } else if (typeof obj.position === "string") {
         obj.position = JSON.parse(obj.position);
       }
 
@@ -154,7 +155,7 @@ export default Vue.extend({
           z: 0,
           angle: 0,
         };
-      } else {
+      } else if (typeof obj.rotation === "string") {
         obj.rotation = JSON.parse(obj.rotation);
       }
 
@@ -441,11 +442,26 @@ export default Vue.extend({
           const uniqueID = unique("Av-");
           browser.currentScene.updateImportedNode(avInline, "Avatar", uniqueID);
           const avImport = browser.currentScene.getImportedNode(uniqueID);
-          browser.currentScene.addRootNode(avInline);
+
+          const group = browser.currentScene.createNode("Group");
+          const touchSensor = browser.currentScene.createNode("TouchSensor");
+          group.children[0] = avInline;
+          group.children[1] = touchSensor;
+
+          browser.currentScene.addRootNode(group);
+
+          touchSensor.addFieldCallback("touchTime", {}, (_t) => {
+            if (this.$refs.chat) {
+              (this.$refs.chat as any).selectedUser = event.username;
+              (this.$refs.chat as any).activePanel = "users";
+            }
+          });
+
           this.users[event.id].loading = false;
           this.users[event.id].loaded = true;
           this.users[event.id]["inline"] = avInline;
           this.users[event.id]["import"] = avImport;
+          this.users[event.id]["group"] = group;
 
           if (this.users[event.id]["inline"]) {
             if (
@@ -509,7 +525,11 @@ export default Vue.extend({
     onAvatarRemoved(event): void {
       const { id } = event;
 
-      if (this.users[id].inline) {
+      if (this.users[id].group) {
+        X3D.getBrowser(this.browser)
+          .currentScene
+          .removeRootNode(this.users[id].group);
+      } else if (this.users[id].inline) {
         X3D.getBrowser(this.browser)
           .currentScene
           .removeRootNode(this.users[id].inline);
@@ -605,40 +625,43 @@ export default Vue.extend({
     reloadWindow(): void {
       window.location.reload();
     },
-    async saveObjectLocation(objectId): Promise<void> {
-      const obj = this.sharedObjectsMap.get(objectId);
-      const location = {
-        position: {
-          x: obj.translation.x,
-          y: obj.translation.y,
-          z: obj.translation.z,
-        },
-        rotation: {
-          x: obj.rotation.x,
-          y: obj.rotation.y,
-          z: obj.rotation.z,
-          angle: obj.rotation.angle,
-        },
-
-      };
-      if(this.$store.data.place.type === "shop"){
-        await this.$http.post(`/mall/${  objectId  }/position`, location);
-        /*
-        /* This crashes the server.
-        /*
-        this.$socket.emit('SO', {
-          event: 'move',
-          objectId: objectId,
-          detail: location
-        });*/
-      } else {
-        await this.$http.post(`/object_instance/${  objectId  }/position`, location);
-        this.$socket.emit("SO", {
-          event: "move",
-          objectId: objectId,
-          detail: location,
-        });
+    saveObjectLocation(objectId): void {
+      if (this.saveTimeouts.has(objectId)) {
+        clearTimeout(this.saveTimeouts.get(objectId));
       }
+      const timeout = setTimeout(async () => {
+        this.saveTimeouts.delete(objectId);
+        const obj = this.sharedObjectsMap.get(objectId);
+        if (!obj) return;
+        const location = {
+          position: {
+            x: obj.translation.x,
+            y: obj.translation.y,
+            z: obj.translation.z,
+          },
+          rotation: {
+            x: obj.rotation.x,
+            y: obj.rotation.y,
+            z: obj.rotation.z,
+            angle: obj.rotation.angle,
+          },
+        };
+        try {
+          if (this.$store.data.place.type === "shop") {
+            await this.$http.post(`/mall/${  objectId  }/position`, location);
+          } else {
+            await this.$http.post(`/object_instance/${  objectId  }/position`, location);
+            this.$socket.emit("SO", {
+              event: "move",
+              objectId: objectId,
+              detail: location,
+            });
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }, 500);
+      this.saveTimeouts.set(objectId, timeout);
     },
     sendSharedEvent(event): void {
       this.$socket.emit("SE", event.detail);

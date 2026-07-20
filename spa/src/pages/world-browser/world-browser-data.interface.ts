@@ -25,4 +25,5 @@ export interface WorldBrowserData {
     force2d: boolean;
     pet: any;
     clickId: string;
+    saveTimeouts: Map<any, any>;
 }

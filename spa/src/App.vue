@@ -33,7 +33,7 @@
         </div>
         <!--Navigation Panel-->
         <div
-          class="flex-none w-60 bg-lines overflow-y-auto"
+          class="flex-none w-60 bg-lines overflow-y-auto relative z-10"
           v-if="$store.data.isUser && this.$route.meta.wrapper"
         >
           <div class="flex flex-col">
@@ -74,6 +74,12 @@
                   v-if="$store.data.user.hasHome"
                   :to="'/home/'+$store.data.user.username"
                 ></router-link>
+                <a href="#"
+                  class="menuLink"
+                  style="top: 98px"
+                  v-else
+                  @click.prevent="showNoHomeAlert"
+                ></a>
                 <router-link to="/citymap"
                   class="menuMapLink"
                 ></router-link>
@@ -344,6 +350,9 @@ export default Vue.extend({
     },
     reloadWindow(): void {
       window.location.reload();
+    },
+    showNoHomeAlert(): void {
+      alert("You do not have a home yet! Please visit a block on the City Map to claim a FREE home.");
     },
     openInfoModal(): void {
       ModalService.open(InfoModal);
