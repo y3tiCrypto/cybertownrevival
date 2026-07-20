@@ -56,6 +56,9 @@
           v-model="message"
           class="flex-grow p-0.5 text-black"
           @keyup.exact.enter="sendMessage"
+          @keydown.stop
+          @keyup.stop
+          @keypress.stop
           maxlength="255"
           v-focus
         />
@@ -1163,12 +1166,16 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
         if (oldMessages.length > 0 && newMessages[0] !== oldMessages[0]) {
         } else {
           const chat = this.$refs.chatArea as Element;
-          this.$nextTick(function () {
-            chat.scrollTop = chat.scrollHeight;
-            setTimeout(() => {
+          if (chat) {
+            this.$nextTick(function () {
               chat.scrollTop = chat.scrollHeight;
-            }, 50);
-          });
+              setTimeout(() => {
+                if (chat) {
+                  chat.scrollTop = chat.scrollHeight;
+                }
+              }, 50);
+            });
+          }
         }
       },
       deep: true,
@@ -1198,6 +1205,12 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
   },
   beforeDestroy() {
     this.setTimers(false);
+    this.$socket.off("CHAT");
+    this.$socket.off("AV:del");
+    this.$socket.off("AV:new");
+    this.$socket.off("disconnect");
+    this.$socket.off("update-object");
+    this.$socket.off("moderation_event");
   },
   mounted() {
     this.debugMsg("starting chat page...");

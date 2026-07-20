@@ -905,7 +905,14 @@ export default Vue.extend({
   mounted() {
     this.startSocketListeners();
   },
-  beforeDestroy() {},
+  beforeDestroy() {
+    this.$socket.off("SO");
+    this.$socket.off("AV");
+    this.$socket.off("AV:del");
+    this.$socket.off("AV:new");
+    this.$socket.off("AV:update");
+    this.$socket.off("SE");
+  },
   async beforeCreate() {
     await this.$socket.start();
   },
