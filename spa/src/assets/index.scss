@@ -1,3 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Cousine:ital,wght@0,400;0,700;1,400;1,700&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+@font-face {
+  font-family: 'Arial';
+  src: local('Arimo'), url('https://fonts.gstatic.com/s/arimo/v29/P5sMzZBgf0u55KA_KMD_gsh2PQ.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Times New Roman';
+  src: local('Tinos'), url('https://fonts.gstatic.com/s/tinos/v20/Gg8z75q144Lw4L7s.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Courier New';
+  src: local('Cousine'), url('https://fonts.gstatic.com/s/cousine/v26/M300jf1b45610Hc.woff2') format('woff2');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
