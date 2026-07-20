@@ -521,6 +521,20 @@ export default Vue.extend({
 
       delete this.users[id];
     },
+    onAvatarUpdated(event): void {
+      const { id } = event;
+      if (this.users[id]) {
+        const currentTransform = {
+          pos: this.users[id].transform?.pos || [0, 0, 0],
+          rot: this.users[id].transform?.rot || [0, 1, 0, 0],
+        };
+        this.onAvatarRemoved({ id });
+        this.users[id] = {
+          transform: currentTransform,
+        };
+        this.onAvatarAdded(event);
+      }
+    },
     onSharedEvent(event): void {
       for (const node of this.eventNodeMap.get(event.name)) {
         node[`${event.type  }FromServer`] = this.TYPES[event.type].fromJSON(
@@ -740,6 +754,7 @@ export default Vue.extend({
       this.$socket.on("AV", event => this.onAvatarMoved(event));
       this.$socket.on("AV:del", event => this.onAvatarRemoved(event));
       this.$socket.on("AV:new", event => this.onAvatarAdded(event));
+      this.$socket.on("AV:update", event => this.onAvatarUpdated(event));
       this.$socket.on("SE", event => this.onSharedEvent(event));
     },
     async startX3D(): Promise<any> {

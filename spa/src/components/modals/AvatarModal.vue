@@ -77,7 +77,24 @@ export default Vue.extend({
         const response = await this.$http.post("/member/update_avatar", {
           avatarId: id,
         });
-        this.$store.data.user.avatar.id = id;
+        const selectedAvatar = this.avatars.find((a: any) => a.id === id);
+        if (selectedAvatar) {
+          const avatarCopy = { ...selectedAvatar };
+          if (
+            typeof avatarCopy.gestures === "string" &&
+            avatarCopy.gestures !== ""
+          ) {
+            avatarCopy.gestures = JSON.parse(avatarCopy.gestures);
+          }
+          this.$store.data.user.avatar = avatarCopy;
+          if (this.$socket.connected) {
+            this.$socket.emit("AV:update", {
+              avatar: avatarCopy,
+            });
+          }
+        } else {
+          this.$store.data.user.avatar.id = id;
+        }
         this.$store.methods.setToken(response.data.token);
         this.avatarId = id;
         this.showSuccess = true;

@@ -123,6 +123,20 @@ io.on("connection", async function(socket) {
         }
     });
 
+    socket.on("AV:update", function(msg) {
+        if (!msg || !msg.avatar) return;
+        const user = USERS.get(socket);
+        if (user) {
+            user.avatar = msg.avatar;
+            if (user.room) {
+                socket.to(user.room).emit("AV:update", {
+                    id: socket.id,
+                    avatar: msg.avatar,
+                });
+            }
+        }
+    });
+
     //handle shared events
     socket.on("SE", function(msg) {
         console.log(msg);
