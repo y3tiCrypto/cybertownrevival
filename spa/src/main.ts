@@ -60,6 +60,7 @@ router.beforeEach(async (to, from, next) => {
     await api.get<any>(`/place/by_id/${to.params.place_id}`)
       .then(response => {
         const Data = response.data;
+        appStore.methods.setPlace(Data.place);
         if (Data.place.type === 'club' && Data.place.private) {
           api.get<any>(`/club/ismember?clubId=${Data.place.id}`)
             .then(response => {
@@ -80,12 +81,18 @@ router.beforeEach(async (to, from, next) => {
                   type: Data.place.type
                 }).then(response => {
                   if (!response.data.admin) {
-                    next('/clubdoor/${Data.place.id}')
+                    next(`/clubdoor/${Data.place.id}`)
                   }
                 })
               }
             });
         }
+      });
+  } else if (to.fullPath.includes("/virtualpet/")) {
+    await api.get<any>(`/place/by_id/${to.params.place_id}`)
+      .then(response => {
+        const Data = response.data;
+        appStore.methods.setPlace(Data.place);
       });
   } else if (to.fullPath.includes("/clubdoor/")) {
     await api.get<any>(`/place/by_id/${to.params.id}`)
