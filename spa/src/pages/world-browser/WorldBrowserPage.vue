@@ -9,7 +9,15 @@
         </a>
       </strong>
     </div>
-    <div id="world" class="world w-full flex-1 min-h-0 min-w-0" style="" v-show="this.$store.data.view3d && !force2d"></div>
+    <div class="relative w-full flex-1 min-h-0 min-w-0" v-show="this.$store.data.view3d && !force2d">
+      <div id="world" class="world w-full h-full"></div>
+      <div class="absolute bottom-2 left-2 flex flex-row items-center gap-2 bg-black bg-opacity-70 border border-green-800 p-1.5 rounded z-20">
+        <button class="btn-ui-inline text-xs" @click="toggleNoclip">
+          <span v-if="noclip" class="text-yellow-400 font-bold">NOCLIP: ON</span>
+          <span v-else class="text-white">NOCLIP: OFF</span>
+        </button>
+      </div>
+    </div>
     <div v-show="!this.$store.data.view3d || force2d" class="w-full flex-1">
       <component :is="mainComponent"></component>
     </div>
@@ -70,9 +78,27 @@ export default Vue.extend({
       pet: null,
       clickId: null,
       saveTimeouts: new Map(),
+      noclip: false,
     };
   },
   methods: {
+    toggleNoclip(): void {
+      try {
+        const browser = X3D.getBrowser(this.browser);
+        const navInfo = browser.currentScene.getNavigationInfo();
+        if (navInfo) {
+          if (this.noclip) {
+            navInfo.type = new X3D.MFString(["WALK", "ANY"]);
+            this.noclip = false;
+          } else {
+            navInfo.type = new X3D.MFString(["FLY", "ANY"]);
+            this.noclip = true;
+          }
+        }
+      } catch (e) {
+        console.error("Error toggling noclip mode:", e);
+      }
+    },
     addPet(data): void {
       let userPosition = this.position;
       let userRotation = this.rotation;
@@ -220,6 +246,9 @@ export default Vue.extend({
       }
     },
     async loadAndJoinPlace(): Promise<void> {
+      window.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
+      window.dispatchEvent(new KeyboardEvent("keyup", { key: "Control" }));
+      window.dispatchEvent(new KeyboardEvent("keyup", { key: "Alt" }));
       this.loaded = false;
       this.force2d = false;
 
@@ -264,6 +293,9 @@ export default Vue.extend({
       this.joinPlace();
     },
     async unloadPlace(): Promise<void> {
+      window.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
+      window.dispatchEvent(new KeyboardEvent("keyup", { key: "Control" }));
+      window.dispatchEvent(new KeyboardEvent("keyup", { key: "Alt" }));
       if (this.$store.data.place) this.$socket.leaveRoom(this.$store.data.place.id);
       const browser = X3D.getBrowser(this.browser);
       browser.replaceWorld(null);
@@ -388,8 +420,14 @@ export default Vue.extend({
         viewpoint.set_bind = true;
         viewpoint.addFieldCallback("isBound", {}, (value) => {
           if(!value) {
-            browser.currentScene.removeRootNode(viewpoint);
-            viewpoint.dispose();
+            setTimeout(() => {
+              try {
+                browser.currentScene.removeRootNode(viewpoint);
+                viewpoint.dispose();
+              } catch (e) {
+                console.error("Error disposing beamed viewpoint:", e);
+              }
+            }, 0);
           }
         });
       }
@@ -857,6 +895,45 @@ export default Vue.extend({
       }
       browserProto.getTime = browserProto.getCurrentTime;
       this.sharedObjectsMap = new Map();
+
+      // Bind Entry/Camera viewpoint and adjust stepHeight
+      setTimeout(() => {
+        try {
+          const viewpoints = browser.currentScene.getViewpoints();
+          let entryViewpoint = viewpoints.find(vp => vp.description === "Entry" || vp.description === "Camera01");
+          if (!entryViewpoint && viewpoints.length > 0) {
+            entryViewpoint = viewpoints.find(vp => vp.description && vp.description !== "");
+          }
+          if (entryViewpoint) {
+            entryViewpoint.bind = true;
+            this.debugMsg("Bound entry viewpoint", entryViewpoint.description);
+          }
+        } catch (e) {
+          console.error("Error binding entry viewpoint", e);
+        }
+
+        try {
+          const navInfo = browser.currentScene.getNavigationInfo();
+          if (navInfo && navInfo.avatarSize) {
+            const size = [];
+            for (let i = 0; i < navInfo.avatarSize.length; i++) {
+              size.push(navInfo.avatarSize[i]);
+            }
+            if (size.length >= 3) {
+              size[2] = Math.max(size[2], 1.0);
+            } else {
+              size[0] = size[0] || 0.25;
+              size[1] = size[1] || 1.75;
+              size[2] = 1.0;
+            }
+            navInfo.avatarSize = new X3D.MFFloat(size);
+            this.debugMsg("Set NavigationInfo avatarSize stepHeight to", size[2]);
+          }
+        } catch (e) {
+          console.error("Error setting navigation info stepHeight", e);
+        }
+      }, 500);
+
       setTimeout(() => {
         //this.sharedObjectsMap = new Map();
         this.sharedObjects.forEach((object) => {
@@ -927,6 +1004,14 @@ export default Vue.extend({
   },
   mounted() {
     this.startSocketListeners();
+    (window as any).loadCustom = (url: string, width?: number, height?: number) => {
+      const w = width || 600;
+      const h = height || 500;
+      window.open(url, '_blank', `width=${w},height=${h},scrollbars=yes,resizable=yes`);
+    };
+    (window as any).loadInfo = (url: string) => {
+      window.open(url, '_blank');
+    };
   },
   beforeDestroy() {
     this.$socket.off("SO");
@@ -935,6 +1020,8 @@ export default Vue.extend({
     this.$socket.off("AV:new");
     this.$socket.off("AV:update");
     this.$socket.off("SE");
+    delete (window as any).loadCustom;
+    delete (window as any).loadInfo;
   },
   async beforeCreate() {
     await this.$socket.start();

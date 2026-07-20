@@ -26,4 +26,5 @@ export interface WorldBrowserData {
     pet: any;
     clickId: string;
     saveTimeouts: Map<any, any>;
+    noclip: boolean;
 }
