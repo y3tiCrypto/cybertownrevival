@@ -1,6 +1,15 @@
 <template>
   <div class="flex-1 w-full text-center text-xl">
     <div class="w-4/5 justify-self-center">
+      <div class="text-3xl text-green p-3">Virtual Pets in Cybertown</div>
+      
+      <div class="text-left border-2 border-green-800 p-4 mb-6 rounded text-sm text-chat" style="background-color: #0b1a0e;">
+        <h4 class="font-bold text-green mb-2" style="font-size: 16px;">What is a Virtual Pet?</h4>
+        <p class="mb-3 text-white">A Virtual Pet is an automated interactive 3D companion that lives in your 3D home. It can welcome visitors, respond to room chat messages, whisper private replies, or even warp (beam) to a specific spot in the room when triggered.</p>
+        <h4 class="font-bold text-green mb-2" style="font-size: 16px;">How it works:</h4>
+        <p class="text-white">Your pet monitors the room chat. When a visitor types a message matching one of your programmed triggers, the pet automatically responds using its assigned voice, text replies, or actions (whispering or beaming).</p>
+      </div>
+
       <div class="text-3xl text-green p-3">How to program your new Pet</div>
       <ul class="text-left list-decimal">
         <li> Give your new Pet a nickname</li>
