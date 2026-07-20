@@ -1,5 +1,5 @@
 <template>
-  <div id="MessageBoard" class="w-full flex-1 h-full">
+  <div id="MessageBoard" class="w-full flex-grow h-full bg-black text-white p-2">
     <div v-if="this.active === 'view'" style="height:100%">
       <div class="overflow-y-auto" style="height:70%">
         <div v-if="success" class="text-chat"><center>{{ success }}</center></div>
@@ -45,13 +45,10 @@
       <div v-if="!display" class="w-full" style="height:30%">
         <hr/>
       </div>
-      <div v-if="display" class="w-full overflow-y-auto" style="height:30%">
-        <hr/>
-        <div class="border-black border-4"/>
-        <div class="w-full flex flex-row">
-          <div class="flex-grow border-2 border-black"/>
-          <div class="flex-grow" style="width:80%">
-            <p>Date: {{ new Date(ddate)
+      <div v-if="display" class="w-full overflow-y-auto border-t-4 border-black p-2 bg-black" style="height:30%">
+        <div class="w-full flex flex-row justify-between items-start gap-4">
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-yellow-200">Date: <span class="font-normal text-white">{{ new Date(ddate)
                   .toLocaleString('en-US', {
                     weekday: 'short',
                     month: 'short',
@@ -60,27 +57,20 @@
                     hour: 'numeric',
                     minute: 'numeric',
                     timeZone: 'America/Detroit',
-                  })}}</p>
-            <p>Subject: <span v-if="this.dreply === 1">RE: </span>{{ dsubject }}</p>
-            <p>From: {{ dfrom }}</p>
+                  })}}</span></p>
+            <p class="font-bold text-yellow-200">Subject: <span class="font-normal text-white"><span v-if="this.dreply === 1">RE: </span>{{ dsubject }}</span></p>
+            <p class="font-bold text-yellow-200">From: <span class="font-normal text-white">{{ dfrom }}</span></p>
           </div>
-          <div class="flex-grow" style="width:19%">
-            <div class="flex-grow border-2 border-black">
-              <button class="btn-ui" @click="switchReply()">REPLY</button>
-            </div>
-            <div class="flex-grow border-2 border-black">
-              <button
-               class="btn-ui"
-               v-show="this.boardadmin"
-               @click="deleteMessageboardMessage()">DELETE</button>
-            </div>
+          <div class="flex flex-col gap-2 flex-none">
+            <button class="btn-ui" @click="switchReply()">REPLY</button>
+            <button
+             class="btn-ui"
+             v-show="this.boardadmin"
+             @click="deleteMessageboardMessage()">DELETE</button>
           </div>
         </div>
-        <div class="w-full flex flex-row">
-          <div class="flex-grow border-2 border-black"/>
-          <p>
-            <div class="flex-grow border-black"
-                style="width:99%; margin-top: 10px" v-html="this.dmessage[0].message"/>
+        <div class="w-full border-t border-gray-700 mt-2 pt-2">
+          <div class="text-white whitespace-pre-wrap break-words" v-html="this.dmessage[0].message" />
         </div>
       </div>
     </div>
