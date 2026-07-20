@@ -4,6 +4,7 @@ import express from 'express';
 const fileUpload = require('express-fileupload');
 import { Request, Response } from 'express';
 import morgan from 'morgan';
+import { SocketServer } from './socket';
 import {
   adminRoutes,
   avatarRoutes,
@@ -81,5 +82,6 @@ app.use((error: HttpException, request: Request, response: Response) => {
 });
 
 const server = http.createServer(app);
+new SocketServer(server);
 const port = process.env.PORT || 3000;
 server.listen(port, () => console.log(`Listening on port ${port}`));

@@ -6,8 +6,7 @@
     "serve": "vue-cli-service serve --mode development --watch",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "dev": "vue-cli-service build --mode development --watch",
-    "dev-server": "nodemon --inspect=0.0.0.0:9230 -r dotenv/config server.js"
+    "dev": "vue-cli-service build --mode development --watch"
   },
   "dependencies": {
     "axios": "^0.23.0",
