@@ -104,4 +104,15 @@ const appStore = Vue.observable<AppStore>({
         },
     },
 });
+
+if (typeof window !== "undefined") {
+    window.addEventListener("storage", (event) => {
+        if (event.key === "token" && !event.newValue) {
+            appStore.methods.destroySession();
+            window.location.reload();
+        }
+    });
+}
+
 export default appStore;
+
