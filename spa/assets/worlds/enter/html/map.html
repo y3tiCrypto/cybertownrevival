@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cybertown Plaza Map</title>
+  <style>
+    body {
+      background-color: #0c0f12;
+      color: #00ffcc;
+      font-family: 'Courier New', Courier, monospace;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h2 {
+      color: #ff0077;
+      text-shadow: 0 0 10px #ff0077;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .card {
+      background-color: #171d24;
+      border: 2px solid #00ffcc;
+      border-radius: 8px;
+      padding: 15px 10px;
+      cursor: pointer;
+      box-shadow: 0 0 5px #00ffcc;
+      transition: all 0.2s ease-in-out;
+    }
+    .card:hover {
+      background-color: #ff0077;
+      color: #fff;
+      border-color: #fff;
+      box-shadow: 0 0 15px #ff0077;
+      transform: scale(1.05);
+    }
+    .card-title {
+      font-weight: bold;
+      font-size: 14px;
+    }
+  </style>
+  <script>
+    function goTo(slug) {
+      try {
+        if (window.opener && !window.opener.closed) {
+          window.opener.location.href = '/place/' + slug;
+        } else {
+          window.open('/place/' + slug, '_blank');
+        }
+        window.close();
+      } catch (e) {
+        console.error(e);
+        window.open('/place/' + slug, '_blank');
+        window.close();
+      }
+    }
+  </script>
+</head>
+<body>
+  <h2>CHOOSE YOUR DESTINATION</h2>
+  <div class="grid">
+    <div class="card" onclick="goTo('enter')">
+      <div class="card-title">PLAZA</div>
+    </div>
+    <div class="card" onclick="goTo('mall')">
+      <div class="card-title">MALL</div>
+    </div>
+    <div class="card" onclick="goTo('beach')">
+      <div class="card-title">BEACH</div>
+    </div>
+    <div class="card" onclick="goTo('funpark')">
+      <div class="card-title">FUN PARK</div>
+    </div>
+    <div class="card" onclick="goTo('cityhall')">
+      <div class="card-title">CITY HALL</div>
+    </div>
+    <div class="card" onclick="goTo('scifi_col')">
+      <div class="card-title">SCI-FI COLONY</div>
+    </div>
+    <div class="card" onclick="goTo('hitek_col')">
+      <div class="card-title">HI-TEK COLONY</div>
+    </div>
+    <div class="card" onclick="goTo('ent_col')">
+      <div class="card-title">ENTERTAINMENT</div>
+    </div>
+    <div class="card" onclick="goTo('cyberhood')">
+      <div class="card-title">CYBERHOOD</div>
+    </div>
+  </div>
+</body>
+</html>
