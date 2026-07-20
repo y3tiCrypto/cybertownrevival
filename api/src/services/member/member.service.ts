@@ -437,6 +437,9 @@ export class MemberService {
         admin: member.admin,
       },
       process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRE || '7d',
+      },
     );
   }
 
