@@ -543,11 +543,38 @@ export default Vue.extend({
       }
     },
     async onSharedObjectEvent(event): Promise<void> {
+      if (event.event === "move" && event.objectId && event.detail) {
+        if (this.$store.data.view3d) {
+          const target = this.sharedObjectsMap.get(event.objectId);
+          if (target) {
+            target.translation = new X3D.SFVec3f(
+              event.detail.position.x,
+              event.detail.position.y,
+              event.detail.position.z,
+            );
+            target.rotation = new X3D.SFRotation(
+              event.detail.rotation.x,
+              event.detail.rotation.y,
+              event.detail.rotation.z,
+              event.detail.rotation.angle,
+            );
+          }
+        }
+        const localObj = this.sharedObjects.find(obj => obj.id === event.objectId);
+        if (localObj) {
+          localObj.position = event.detail.position;
+          localObj.rotation = JSON.stringify(event.detail.rotation);
+        }
+        return;
+      }
+
       if(this.$store.data.view3d){
         const browser = X3D.getBrowser();
         this.sharedObjects.forEach(sharedObject => {
           const object = this.sharedObjectsMap.get(sharedObject.id);
-          browser.currentScene.removeRootNode(object);
+          if (object) {
+            browser.currentScene.removeRootNode(object);
+          }
           this.sharedObjectsMap.delete(sharedObject.id);
         });
         this.sharedObjects = [];
