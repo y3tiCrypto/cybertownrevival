@@ -757,7 +757,7 @@ DEF trans Transform{ children[
   DEF effect_view Viewpoint{}
   #Transform{ translation 0 0 3 children Box{}}
 ]}
-DEF default_view Viewpoint{position 0 1.75 0}
+DEF default_view Viewpoint { position -8.29 4.62 60.3 orientation 0 -1 0 -0.576 description "Entry" }
 DEF clock1 LoopCountClock {cycleInterval 10 loopCount 2}
 DEF pinterp PositionInterpolator {
 key [
@@ -950,7 +950,7 @@ NavigationInfo {
 avatarSize [
 .25 1.75 .75
 ]
-speed 3
+speed 10
 headlight FALSE
 }
 
@@ -1407,7 +1407,7 @@ specularColor 0.045 0.045 0.045
 shininess 0.287
 transparency 0.5
 }
-texture  MovieTexture {
+texture  ImageTexture {
 url "poolwater.gif"
 }
 }
