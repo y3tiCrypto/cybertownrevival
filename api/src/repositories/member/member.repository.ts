@@ -46,6 +46,17 @@ export class MemberRepository {
   }
 
   /**
+   * Finds a member by email case-insensitively.
+   * @param email email address to search for
+   * @returns promise resolving in the found member object or undefined
+   */
+  public async findByEmail(email: string): Promise<Member> {
+    const [member] = await this.db.knex<Member>('member')
+      .whereRaw('LOWER(email) = ?', [email.toLowerCase()]);
+    return member;
+  }
+
+  /**
    * Finds a member with the given id if one exists.
    * @param memberId id of member to search for
    * @returns promise resolving in the found member object, or rejecting on error

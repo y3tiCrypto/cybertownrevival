@@ -286,8 +286,8 @@ class MemberController {
     const { email } = request.body;
     try {
       this.validatePasswordResetInput(email);
-      const member = await this.memberService.find({ email, status: 1 });
-      if (member) {
+      const member = await this.memberService.findByEmail(email);
+      if (member && member.status === 1) {
         const resetToken = await this.memberService.enablePasswordReset(member.id);
         await sendPasswordResetEmail(email, resetToken);
       } else {

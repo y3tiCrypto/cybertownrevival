@@ -348,6 +348,10 @@ export class MemberService {
     return { banned, banInfo };
   }
 
+  public async findByEmail(email: string): Promise<Member> {
+    return this.memberRepository.findByEmail(email);
+  }
+
   /**
    * Validates the given username and password and logs a user in.
    * @param username username of member to be logged in
