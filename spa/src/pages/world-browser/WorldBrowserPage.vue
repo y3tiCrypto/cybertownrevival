@@ -259,8 +259,9 @@ export default Vue.extend({
         this.force2d = true;
       }
 
-      if(this.$route.params.username){
-        if(this.$store.data.place.assets_dir === null) {
+      if (this.$store.data.place) {
+        const p = this.$store.data.place;
+        if (!p.assets_dir || p.assets_dir === "null/" || !p.world_filename) {
           this.force2d = true;
         }
       }
@@ -980,8 +981,26 @@ export default Vue.extend({
               traverseAndSetMovieUrls(rootNodes[i]);
             }
           }
+        // Inject default lighting fallback if scene lacks light nodes (#117)
+        try {
+          const rootNodes = browser.currentScene.rootNodes;
+          let hasLight = false;
+          for (let i = 0; i < rootNodes.length; i++) {
+            const nodeName = typeof rootNodes[i].getNodeName === "function" ? rootNodes[i].getNodeName() : "";
+            if (nodeName.toLowerCase().includes("light")) {
+              hasLight = true;
+              break;
+            }
+          }
+          if (!hasLight) {
+            const light = browser.currentScene.createNode("DirectionalLight");
+            light.direction = new X3D.SFVec3f(-0.5, -1.0, -0.5);
+            light.intensity = 0.8;
+            browser.currentScene.addRootNode(light);
+            this.debugMsg("Added fallback DirectionalLight to 3D scene");
+          }
         } catch (e) {
-          console.error("Error setting custom place media URL inside XITE scene graph:", e);
+          console.error("Error setting fallback light node:", e);
         }
       }, 500);
 
@@ -1000,6 +1019,9 @@ export default Vue.extend({
   computed: {
     worldUrl(): string {
       const { assets_dir, world_filename } = this.$store.data.place;
+      if (assets_dir === "beach/" && world_filename === "beach.wrl") {
+        return "/assets/worlds/beach/vrml/beach.wrl";
+      }
       return `/assets/worlds/${assets_dir}${world_filename}`;
     },
   },

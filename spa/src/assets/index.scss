@@ -259,3 +259,16 @@ input::placeholder, textarea::placeholder {
     }
   }
 }
+
+/* XITE Loading Screen & Canvas Branding (#35) */
+.xite-logo,
+[class*="xite-logo"],
+div[style*="xite-logo"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+X3DCanvas, x3d-canvas {
+  background-color: #050811 !important;
+}

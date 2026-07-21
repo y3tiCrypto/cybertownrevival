@@ -836,7 +836,7 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
       this.closeMenu();
     },
     beamTo(): void {
-      this.$emit("beam-to", this.objectId);
+      this.$emit("beam-to", this.username || this.objectId);
       this.closeMenu();
     },
     blockMember(){

@@ -28,12 +28,12 @@
     </span>
     <br />
     <div v-if="$store.data.place.slug === 'mall'">
-      <button class="btn-ui" v-on:click="opener('#/mall/catalog')">Mall Catalog</button>
+      <button class="btn-ui" v-on:click="opener('/mall/catalog')">Mall Catalog</button>
       <br />
       <router-link 
       :to="{ name: 'mall-upload' }"
       class="btn-ui">Upload</router-link>
-      <button class="btn-ui" v-on:click="opener('#/creator/stocked')">My Uploads</button>
+      <button class="btn-ui" v-on:click="opener('/creator/stocked')">My Uploads</button>
       <br />
     </div>
     <div v-if="canAdmin">
