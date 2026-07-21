@@ -195,14 +195,18 @@ export default Vue.extend({
         const path: string = redirectString || "/place/enter";
         this.$router.push({ path });
       } catch (error) {
-        if(error.response.data.error === "banned") {
-          this.$router.push({ name: "banned" });
-        }
-        else if (error.response.data.error) {
-          this.error = error.response.data.error;
-          this.showError = true;
+        if (error.response && error.response.data) {
+          if (error.response.data.error === "banned") {
+            this.$router.push({ name: "banned" });
+          } else if (error.response.data.error) {
+            this.error = error.response.data.error;
+            this.showError = true;
+          } else {
+            this.error = "An unknown error occurred";
+            this.showError = true;
+          }
         } else {
-          this.error = "An unknown error occurred";
+          this.error = error.message || "An unknown error occurred";
           this.showError = true;
         }
       }

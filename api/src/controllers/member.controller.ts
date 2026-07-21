@@ -118,7 +118,7 @@ class MemberController {
       response.status(200).json( places );
     } catch (error) {
       console.error(error);
-      response.status(400).json({ error });
+      response.status(400).json({ error: error.message });
     }
   }
 

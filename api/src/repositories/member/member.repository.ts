@@ -35,6 +35,17 @@ export class MemberRepository {
   }
 
   /**
+   * Finds a member by username case-insensitively.
+   * @param username username to search for
+   * @returns promise resolving in the found member object or undefined
+   */
+  public async findByUsername(username: string): Promise<Member> {
+    const [member] = await this.db.knex<Member>('member')
+      .whereRaw('LOWER(username) = ?', [username.toLowerCase()]);
+    return member;
+  }
+
+  /**
    * Finds a member with the given id if one exists.
    * @param memberId id of member to search for
    * @returns promise resolving in the found member object, or rejecting on error

@@ -355,7 +355,7 @@ export class MemberService {
    * @returns
    */
   public async login(username: string, password: string): Promise<string> {
-    const member = await this.memberRepository.find({ username });
+    const member = await this.memberRepository.findByUsername(username);
     if (!member) throw new Error('Account not found.');
     const validPassword = await bcrypt.compare(password, member.password);
     if (!validPassword) throw new Error('Incorrect login details.');
@@ -521,20 +521,21 @@ export class MemberService {
     const returnPlaces = [];
     const placeIds = [];
     const activeTime = new Date(Date.now() - 5 * 60000);
-    const places = await this.memberRepository.getActivePlaces(activeTime);
+    const places = await this.memberRepository.getActivePlaces(activeTime) || [];
     for (const place of places) {
-      if (placeIds.indexOf(place.place_id) === -1) {
+      if (place && place.place_id && placeIds.indexOf(place.place_id) === -1) {
         placeIds.push(place.place_id);
         const userPlace = await this.placeRepository.findById(place.place_id);
+        if (!userPlace) continue;
         const userCount = await this.memberRepository.countByPlaceId(place.place_id, activeTime);
         place.name = userPlace.name;
         place.slug = userPlace.slug;
         place.type = userPlace.type;
         if (userPlace.member_id) {
           const userOwner = await this.memberRepository.findById(userPlace.member_id);
-          place.username = userOwner.username;
+          place.username = userOwner ? userOwner.username : '';
         }
-        place.count = userCount[0].count;
+        place.count = (userCount && userCount[0]) ? userCount[0].count : 0;
         returnPlaces.push(place);
       }
     }
