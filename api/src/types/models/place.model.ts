@@ -14,4 +14,5 @@ export interface Place extends Model {
   map_icon_index?: number;
   private?: boolean;
   member_id: number;
+  media_url?: string;
 }

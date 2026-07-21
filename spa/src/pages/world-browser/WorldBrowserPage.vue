@@ -18,7 +18,7 @@
         </button>
       </div>
     </div>
-    <div v-show="!this.$store.data.view3d || force2d" class="w-full flex-1">
+    <div v-show="!this.$store.data.view3d || force2d" class="w-full flex-1 place-2d-container">
       <component :is="mainComponent"></component>
     </div>
     <div class="flex flex-none h-1/3 bg-chat">
@@ -931,6 +931,57 @@ export default Vue.extend({
           }
         } catch (e) {
           console.error("Error setting navigation info stepHeight", e);
+        }
+
+        // Update home media screen video/audio sources
+        try {
+          const place = this.$store.data.place;
+          if (place && place.media_url && place.media_url !== "") {
+            this.debugMsg("Custom media URL configured for this place:", place.media_url);
+            
+            const traverseAndSetMovieUrls = (node: any) => {
+              if (!node || typeof node !== "object") return;
+              if (typeof node.getNodeName === "function" && node.getNodeName() === "MovieTexture") {
+                this.debugMsg("Found MovieTexture, updating URL to custom media stream:", place.media_url);
+                node.url = new X3D.MFString([place.media_url]);
+                node.loop = true;
+              }
+              if (typeof node.getFields === "function") {
+                const fields = node.getFields();
+                for (const name in fields) {
+                  const field = fields[name];
+                  if (field && typeof field.getValue === "function") {
+                    try {
+                      const val = field.getValue();
+                      if (val) {
+                        if (Array.isArray(val)) {
+                          for (let k = 0; k < val.length; k++) {
+                            traverseAndSetMovieUrls(val[k]);
+                          }
+                        } else if (typeof field.getLength === "function") {
+                          const len = field.getLength();
+                          for (let k = 0; k < len; k++) {
+                            traverseAndSetMovieUrls(field.getValue(k));
+                          }
+                        } else {
+                          traverseAndSetMovieUrls(val);
+                        }
+                      }
+                    } catch (err) {
+                      // Silently skip non-traversable fields
+                    }
+                  }
+                }
+              }
+            };
+
+            const rootNodes = browser.currentScene.rootNodes;
+            for (let i = 0; i < rootNodes.length; i++) {
+              traverseAndSetMovieUrls(rootNodes[i]);
+            }
+          }
+        } catch (e) {
+          console.error("Error setting custom place media URL inside XITE scene graph:", e);
         }
       }, 500);
 

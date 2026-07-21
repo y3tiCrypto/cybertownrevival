@@ -133,6 +133,7 @@ export class HomeService {
     houseName: string,
     icon2d: number|null,
     homeDesignId: string|null,
+    mediaUrl: string|null = null,
   ): Promise<void> {
 
 
@@ -142,6 +143,7 @@ export class HomeService {
       {
         name: houseName,
         map_icon_index: icon2d,
+        media_url: mediaUrl,
       }, true);
 
     // update home record

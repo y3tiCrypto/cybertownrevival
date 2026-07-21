@@ -26,6 +26,14 @@
               class="input-text"
               v-model="homeName"
             /> (mandatory)</p>
+            <p class="mt-3"><strong>Media Screen URL</strong>: <input
+              type="text"
+              maxlength="255"
+              size="40"
+              class="input-text"
+              v-model="mediaUrl"
+              placeholder="e.g. https://domain.com/video.mp4"
+            /> (optional)</p>
           </div>
 
 
@@ -82,7 +90,7 @@
             <div></div>
 
             <template v-for="(item,key) in homeData" >
-              <div>
+              <div v-if="['008', '009', '00a'].includes(key) ? (colony && colony.slug === 'cyberhood') : true">
                 <input type="radio" :value="key" v-model="home3d" class="mr-3"/>
                 <img :src="'/assets/img/homes/Picon3D' + key + '.gif'" /><br />
                 Price: <strong>{{ item.price }}cc</strong>
@@ -132,6 +140,7 @@ export default Vue.extend({
       home3d: null,
       homeName: "",
       donorLevel: undefined,
+      mediaUrl: "",
     };
   },
   methods: {
@@ -156,6 +165,7 @@ export default Vue.extend({
           }
           this.icon2d = this.home.map_icon_index;
           this.homeName = this.home.name;
+          this.mediaUrl = this.home.media_url || "";
           const blockResponse  = await this.$http.get(`/block/${  homeResponse.data.blockData.id}`);
           this.colony = blockResponse.data.colony;
         }
@@ -176,6 +186,7 @@ export default Vue.extend({
           homeName: this.homeName,
           icon2d: this.icon2d,
           home3d: this.home3d,
+          mediaUrl: this.mediaUrl !== "" ? this.mediaUrl : null,
         });
 
         this.complete = true;

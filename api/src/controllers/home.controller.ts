@@ -6,6 +6,8 @@ import * as badwords from 'badwords-list';
 import {
   MemberService,
   HomeService,
+  BlockService,
+  HoodService,
 } from '../services';
 
 class HomeController {
@@ -220,6 +222,7 @@ class HomeController {
       homeName,
       icon2d,
       home3d,
+      mediaUrl,
     } = request.body;
 
 
@@ -268,6 +271,18 @@ class HomeController {
         if(home3d
           && home3d !== currentHomeDesignId
         ) {
+          if (['008', '009', '00a'].includes(home3d)) {
+            const blockService = Container.get(BlockService);
+            const hoodService = Container.get(HoodService);
+
+            const homeBlock = await this.homeService.getHomeBlock(homeInfo.id);
+            const hood = await blockService.getHood(homeBlock.id);
+            const colony = await hoodService.getColony(hood.id);
+            if (!colony || colony.slug !== 'cyberhood') {
+              throw new Error('These home designs are only available in the Cyberhood colony.');
+            }
+          }
+
           // check they have enough in their wallet to buy the 3d home
           // this is optional (if not null)
           const homeDesignInfo = await this.homeService.getHomeDesign(session.id, home3d);
@@ -290,6 +305,7 @@ class HomeController {
           homeName,
           icon2d,
           home3d,
+          mediaUrl,
         );
 
         if(home3d !== currentHomeDesignId) {
