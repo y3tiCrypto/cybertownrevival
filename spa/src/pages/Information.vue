@@ -9,9 +9,9 @@
             {{ index }}<br/>
           </p>
           <ul>
-            <li v-for="name in job">
+            <li v-for="name in job" :key="name">
               <span class="text-chat cursor-pointer underline"
-                    v-on:click="opener(`#/home/${name}`)">{{ name }}</span>
+                    v-on:click="opener(`/home/${name}`)">{{ name }}</span>
             </li>
           </ul>
         </div>
@@ -21,16 +21,16 @@
       <div>
         Leader<br/>
         <span style="color: #00df00; text-decoration: underline; cursor: pointer;"
-              v-on:click="opener('#/home/'+owner)">{{ owner }}
+              v-on:click="opener('/home/'+owner)">{{ owner }}
         </span>
       </div>
       <div style="padding-top: 10px">
         <p>Deputies</p>
         <ul>
-          <li v-for="deputy in deputies">
+          <li v-for="deputy in deputies" :key="deputy.username || deputy">
             <span style="color: #00df00; text-decoration: underline; cursor: pointer"
-                  v-on:click="opener('#/home/'+deputy.username)">
-            {{ deputy.username }}
+                  v-on:click="opener('/home/'+(deputy.username || deputy))">
+            {{ deputy.username || deputy }}
             </span>
           </li>
         </ul>
@@ -93,21 +93,28 @@ export default Vue.extend({
           this.securityInfo = response.data.securityInfo;
         }
         else {
-          if (response.data.data.owner.length !== 0) {
+          if (response.data.data && response.data.data.owner && response.data.data.owner.length !== 0) {
             this.owner = response.data.data.owner[0].username;
           } else {
-            this.owner = "";
+            this.owner = "N/A";
           }
-          response.data.data.deputies.forEach((username, index) => {
-            this.deputies[index] = username;
-          });
+          if (response.data.data && response.data.data.deputies) {
+            response.data.data.deputies.forEach((username, index) => {
+              this.deputies[index] = username;
+            });
+          }
         }
       });
       return;
     },
-    async opener(link): Promise<void> {
-      window.opener.location.href = link;
-      window.close();
+    async opener(link: string): Promise<void> {
+      const cleanLink = link.startsWith('#') ? link.substring(1) : link;
+      if (window.opener && !window.opener.closed) {
+        window.opener.location.href = cleanLink;
+        window.close();
+      } else {
+        this.$router.push(cleanLink);
+      }
     },
   },
   mounted() {

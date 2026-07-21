@@ -2,7 +2,7 @@
   <div>
 
     <button class="btn-ui"
-            v-on:click="opener('#/information/'
+            v-on:click="opener('/information/'
               + $store.data.place.type
               + '/'
               + $store.data.place.id
