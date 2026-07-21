@@ -30,6 +30,38 @@ router.beforeEach(async (to, from, next) => {
   } else {
     document.title = "Cybertown";
   }
+
+  if (["login", "home"].includes(to.name) && localStorage.token) {
+    try {
+      const response = await api.get<{
+        user: User;
+        status: number;
+        roleName: string;
+        banned: boolean;
+        banInfo: any;
+      }>("/member/session");
+      const { user, banned, banInfo } = response.data;
+      if (banned) {
+        if (banInfo.type !== "jail") {
+          appStore.methods.destroySession();
+          next({
+            name: "banned",
+            params: {
+              reason: banInfo.reason,
+              enddate: banInfo.end_date,
+            },
+          });
+          return;
+        }
+      }
+      appStore.methods.setUser(user);
+      appStore.data.isUser = true;
+      next("/place/enter");
+      return;
+    } catch (e) {
+      appStore.methods.destroySession();
+    }
+  }
   if (to.fullPath.includes("/place/")) {
     await api.get<any>(`/place/${to.params.id}`)
       .then(response => {
