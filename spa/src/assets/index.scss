@@ -235,3 +235,27 @@ input::placeholder, textarea::placeholder {
   color: #6b7280 !important;
   opacity: 1 !important;
 }
+
+.place-2d-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+  
+  img {
+    width: 100%;
+    max-width: 720px;
+    height: auto;
+    margin: 0 auto;
+    border: 2px solid #004d00;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 77, 0, 0.6);
+    transition: all 0.3s ease-in-out;
+    
+    &:hover {
+      border-color: #00df00;
+      box-shadow: 0 0 30px rgba(0, 223, 0, 0.8);
+    }
+  }
+}
