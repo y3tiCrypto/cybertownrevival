@@ -41,19 +41,9 @@
           <h3 class="font-bold mb-3">Choose a free 2D House</h3>
 
           <div class="grid grid-cols-3 gap-4">
-            <template v-if="colonyData[colony.slug].map_theme === 'grass'">
-              <template v-for="index in 33">
-                <div>
-                  <input type="radio" :value="index" v-model="icon2d" class="mr-3">
-                  <img
-                    :src="'/assets/img/map_themes/grass/block/Picon2D'+
-                    (index-1).toString().padStart(3,'0')+'.gif'" />
-                </div>
-              </template>
-            </template>
-            <template v-else-if="colonyData[colony.slug].map_theme === 'desert'">
+            <template v-if="mapTheme === 'desert'">
               <template v-for="index in 7">
-                <div>
+                <div :key="index">
                   <input type="radio" :value="index" v-model="icon2d" class="mr-3">
                   <img
                     :src="'/assets/img/map_themes/desert/block/Picon2D'+
@@ -61,12 +51,22 @@
                 </div>
               </template>
             </template>
-            <template v-else-if="colonyData[colony.slug].map_theme === 'cyberhood'">
+            <template v-else-if="mapTheme === 'cyberhood'">
               <template v-for="index in 5">
-                <div>
+                <div :key="index">
                   <input type="radio" :value="index" v-model="icon2d" class="mr-3">
                   <img
                     :src="'/assets/img/map_themes/cyberhood/block/Picon2D'+
+                    (index-1).toString().padStart(3,'0')+'.gif'" />
+                </div>
+              </template>
+            </template>
+            <template v-else>
+              <template v-for="index in 33">
+                <div :key="index">
+                  <input type="radio" :value="index" v-model="icon2d" class="mr-3">
+                  <img
+                    :src="'/assets/img/map_themes/grass/block/Picon2D'+
                     (index-1).toString().padStart(3,'0')+'.gif'" />
                 </div>
               </template>
@@ -196,6 +196,14 @@ export default Vue.extend({
         this.showError = true;
       }
 
+    },
+  },
+  computed: {
+    mapTheme(): string {
+      if (this.colony && this.colony.slug && (this.colonyData as any)[this.colony.slug]) {
+        return (this.colonyData as any)[this.colony.slug].map_theme || "grass";
+      }
+      return "grass";
     },
   },
   mounted() {

@@ -16,42 +16,33 @@
 						style="height:40px;line-height:40px;"
 					>
 						<template
-							v-if="locations.find(b => b.location === index)"
+							v-if="locations.find(b => b.location === index) && locations.find(b => b.location === index).id"
 						>
-							<router-link
-								:to="
-									'/block/' +
-										locations.find(
-											b => b.location === index
-										).id
-								"
-								class="w-full h-full block text-center flex items-center justify-center"
-								v-if="
-									locations.find(b => b.location === index).id
-								"
-							>
-								<span style="
-									padding: 3px; 
-									max-height: 40px; 
-									line-height: 13px; 
-									overflow: hidden;">{{
-									locations.find(b => b.location === index)
-										.name
-								}}</span>
-							</router-link>
-							<input
-								type="checkbox"
-								v-model="availableLocations"
-								v-else
-								:value="index"
-							/>
+							<div class="w-full h-full flex flex-col items-center justify-center relative">
+								<router-link
+									:to="'/home/' + locations.find(b => b.location === index).username"
+									class="w-full h-full block text-center text-xs truncate"
+									:title="locations.find(b => b.location === index).name"
+								>
+									<span>{{ locations.find(b => b.location === index).name }}</span>
+								</router-link>
+								<input
+									type="checkbox"
+									v-model="availableLocations"
+									:value="index"
+									class="absolute top-0 right-0 z-10 opacity-80 hover:opacity-100"
+									title="Toggle plot availability"
+								/>
+							</div>
 						</template>
 						<template v-else>
-							<input
-								type="checkbox"
-								v-model="availableLocations"
-								:value="index"
-							/>
+							<div class="w-full h-full flex items-center justify-center">
+								<input
+									type="checkbox"
+									v-model="availableLocations"
+									:value="index"
+								/>
+							</div>
 						</template>
 					</div>
 				</div>

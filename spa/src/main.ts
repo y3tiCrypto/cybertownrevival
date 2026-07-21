@@ -132,19 +132,24 @@ router.beforeEach(async (to, from, next) => {
         const Data = response.data;
         appStore.methods.setPlace(Data.place);
       });
-  } else if (to.fullPath.includes("/home/")) {
-    await api.get<any>(`/home/${to.params.username}`)
+  } else if (to.fullPath.includes("/home")) {
+    const targetUsername = to.params.username || (appStore.data.user ? appStore.data.user.username : "");
+    const endpoint = targetUsername ? `/home/${targetUsername}` : "/home";
+    await api.get<any>(endpoint)
       .then(response => {
         const Data = response.data;
-        const place = {
-          ...Data.homeData,
-          assets_dir: Data.homeDesignData ?
-            (`${Data.homeDesignData.id}/`) : null,
-          world_filename: "home.wrl",
-          slug: "home",
-          block: Data.blockData,
-        };
-        appStore.methods.setPlace(place);
+        if (Data && Data.homeData) {
+          const place = {
+            ...Data.homeData,
+            assets_dir: Data.homeDesignData ? `${Data.homeDesignData.id}/` : null,
+            world_filename: Data.homeDesignData ? "home.wrl" : null,
+            slug: "home",
+            block: Data.blockData,
+          };
+          appStore.methods.setPlace(place);
+        }
+      }).catch(err => {
+        console.error("Error hydrating home route:", err);
       });
   }
 
