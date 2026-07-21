@@ -1,9 +1,49 @@
 import { Server as SocketIOServer } from 'socket.io';
 import * as http from 'http';
 import * as jwt from 'jsonwebtoken';
+import * as https from 'https';
 import badwords from 'badwords-list';
 
 const USERS = new Map<string, any>();
+
+function sendDiscordWebhook(username: string, message: string, room: string) {
+  const webhookUrl = process.env.CHAT_WEBHOOK_URL;
+  if (!webhookUrl || webhookUrl === 'https://webhook.example' || webhookUrl.trim() === '') {
+    return;
+  }
+
+  const payload = JSON.stringify({
+    content: `**[${room}] ${username}**: ${message}`,
+  });
+
+  try {
+    const url = new URL(webhookUrl);
+    const options = {
+      hostname: url.hostname,
+      path: url.pathname + url.search,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      if (res.statusCode && res.statusCode >= 400) {
+        console.error(`Discord webhook failed with status code ${res.statusCode}`);
+      }
+    });
+
+    req.on('error', (e) => {
+      console.error('Error sending Discord webhook:', e);
+    });
+
+    req.write(payload);
+    req.end();
+  } catch (error) {
+    console.error('Failed to parse CHAT_WEBHOOK_URL or send webhook:', error);
+  }
+}
 
 export class SocketServer {
   private io: SocketIOServer;
@@ -200,6 +240,7 @@ export class SocketServer {
               new: true,
               exp: chatData.exp,
             });
+            sendDiscordWebhook(user.username, chatData.msg, user.room);
           }
         }
       });
