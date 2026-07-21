@@ -52,6 +52,7 @@
       </div>
       <div class="flex flex-none flex-row space-x-0.5 bg-black" v-show="chatEnabled">
         <input
+          ref="chatInput"
           type="text"
           v-model="message"
           class="flex-grow p-0.5 text-black"
@@ -1201,6 +1202,22 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
         this.$nextTick(() => this.scrollToSelected());
       }
     },
+    chatEnabled(val) {
+      if (val) {
+        this.$nextTick(() => {
+          if (this.$refs.chatInput) {
+            (this.$refs.chatInput as HTMLInputElement).focus();
+          }
+        });
+      }
+    },
+  },
+  directives: {
+    focus: {
+      inserted(el) {
+        el.focus();
+      },
+    },
   },
   computed: {
     connected: function() { return this.$socket.connected; },
@@ -1225,6 +1242,11 @@ export default Vue.extend<ChatData, ChatMethods, ChatComputed, Record<string, an
       this.getXpAmount();
       this.joinedChat();
       this.setTimers(true);
+      this.$nextTick(() => {
+        if (this.$refs.chatInput) {
+          (this.$refs.chatInput as HTMLInputElement).focus();
+        }
+      });
     }
   },
 });
